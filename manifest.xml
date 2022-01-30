@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- ВАЖНО: ПЕРВАЯ СТРОКА ВСЕГДА ?xml, ВЫШЕ НЕЕ НЕ МОЖЕТ БЫТЬ ДАЖЕ КОММЕНТАРИЕВ -->
+
+<!-- Команда для запуска проверки правильности заполнения манифеста -->
+<!-- npm install -g office-addin-manifest -->
+<!-- npm run validate -->
+
+<!-- Как добавить логирование ошибок при дебаге: -->
+<!-- https://dev.to/mattgaiser/how-to-debug-an-office-js-manifest-file-4bi9 -->
+
+<!-- OfficeApp must contain: -->
+<!-- Id -->
+<!-- Version -->
+<!-- ProviderName -->
+<!-- DefaultLocale -->
+<!-- DefaultSettings -->
+<!-- DisplayName -->
+<!-- Description -->
+<!-- Permissions -->
+
+<!-- OfficeApp documentation -->
+<!-- https://docs.microsoft.com/en-us/office/dev/add-ins/reference/manifest/officeapp -->
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
+  
+  <!-- Уникальный ID надстройки -->
+  <Id>1105c741-33cb-41f1-93e6-0cd4edbd6dda</Id>
+  <!-- Версия, которая отображается при публикации в AppStore -->
+  <Version>1.0.0.0</Version>
+  <!-- Метка разработчика надстройки -->
+  <ProviderName>FIN.by</ProviderName>
+  <!-- Локаль по умолчанию: язык и регион по умолчанию -->
+  <DefaultLocale>ru-RU</DefaultLocale>
+  <!-- Название надстройки для AppStore -->
+  <!-- ! НЕ ПУТАТЬ С НАЗВАНИЕМ ВКЛАДКИ НАДСТРОЙКИ НА ЛЕНТЕ EXCEL -->
+  <DisplayName DefaultValue="FIN.by Tools"/>
+  <!-- Краткое описание надстройки (для AppStore) -->
+  <!-- Description до 250 символов -->
+  <Description DefaultValue="Дополнительные возможности взаимодействия с инструментами компании FIN.by."/>
+  <!-- URL иконки -->
+  <IconUrl DefaultValue="https://localhost:3000/assets/icon-32.png"/>
+  <!-- HighResolutionUrl работает только в манифесте версии 1.1 (и выше) -->
+  <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-64.png"/>
+  <!-- Указывает URL-адрес страницы с FAQ надстройки -->
+  <SupportUrl DefaultValue="https://www.fin.by"/>
+  <!-- 
+    Список всех доменов, помимо домена, указанного в элементе SourceLocation, 
+    которые будет использовать ваша надстройка Office и которым Office должен доверять. 
+    Это позволяет страницам в доменах вызывать API-интерфейсы Office.js из IFrame в надстройке и имеет другие эффекты. 
+    Для каждого дополнительного домена укажите элемент AppDomain. 
+  -->
+  <AppDomains>
+    <AppDomain>https://www.contoso.com</AppDomain>
+  </AppDomains>
+  <!-- Приложения, в которых надстройка может использоваться -->
+  <Hosts>
+    <Host Name="Workbook"/>
+  </Hosts>
+  <!-- ! Пока нет четкого понимания, в чем суть этого атрибута -->
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/>
+  </DefaultSettings>
+  <!-- Указывает уровень доступа к API для надстройки Office -->
+  <!-- [Restricted | ReadDocument | ReadAllDocument | WriteDocument | ReadWriteDocument] -->
+  <Permissions>ReadWriteDocument</Permissions>
+  <!-- 
+        Необязательный элемент VersionOverrides заслуживает особого упоминания. 
+        Он содержит дочернюю разметку, которая включает дополнительные функции надстройки. Вот некоторые из них:
+
+        - Настройка ленты и меню Office.
+        - Настройка того, как Office работает со встроенной средой выполнения браузера, в которой запускаются надстройки.
+        - Настройка взаимодействия надстройки с Azure Active Directory и Microsoft Graph для единого входа 
+  -->
+  <!-- https://docs.microsoft.com/en-us/office/dev/add-ins/reference/manifest/versionoverrides-1-0-taskpane -->
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <!-- Непосредственное указание приложения, в котором должна появляться та или иная группа кнопок -->
+    <!-- Т.е. можно настроить, чтобы в рамках одной надстройки присутствовали кнопки и для Excel, и для Word -->
+    <!-- Workbook=Excel, Document=Word, Presentation=PowerPoint -->
+    <Hosts>
+  
+      <Host xsi:type="Workbook">
+  
+        <DesktopFormFactor>
+
+          <!-- Выноска, которая появляется при установке надстройки -->
+          <!-- Если она не указывается, используются атрибуты DisplayName и Description (которые наследуются от OfficeApp) -->
+          <!-- <GetStarted> -->
+            <!-- <Title resid="GetStarted.Title"/> -->
+            <!-- <Description resid="GetStarted.Description"/> -->
+            <!-- <LearnMoreUrl resid="GetStarted.LearnMoreUrl"/> -->
+          <!-- </GetStarted> -->
+
+          <!-- 
+            Файл функций — это html-страница, содержащая javascript, на котором будут вызываться функции для ExecuteAction.
+            Думайте о FunctionFile как о «коде позади» ExecuteFunction 
+          -->
+          <FunctionFile resid="Commands.Url"/>
+          <!-- Определяет, где надстройка появляется в UI Excel -->
+          <!-- PrimaryCommandSurface - ribbon tab -->
+          <!-- ContextMenu - shortcut menu on the right-click in the Office UI -->          
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <!-- Описание вкладки, где появятся кнопки надстройки -->
+            <!-- Это либо CustomTab, либо OfficeTab (id в таком случае это внутреннее название встроенной вкладки) -->
+            <!-- <OfficeTab id="TabHome"> -->
+            <!-- Если CustomTab, id - название пользовательской вкладки -->
+            <!-- https://docs.microsoft.com/en-us/office/dev/add-ins/reference/manifest/customtab -->
+            <CustomTab id="FINbyTools.Tab">
+              <!-- Разбивка кнопок по группам -->
+              <!-- Надстройка может быть представлена только 1 вкладкой, поэтому далее кнопки разбиваются на группы -->
+              <!-- id - уникальный id группы -->-              
+              <!-- https://docs.microsoft.com/en-us/office/dev/add-ins/reference/manifest/group -->
+              <Group id="Group.PQ">
+                <!-- Указываем id названия группы кнопок -->
+                <!-- Далее через связку id в группе Resources (после окончания Hosts) уточняем название и всплывающую подсказку -->
+                <Label resid="Group.PQ.Label"/>
+                <!-- ID иконки группы (в разных размерах) -->
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16"/>
+                  <bt:Image size="32" resid="Icon.32x32"/>
+                  <bt:Image size="80" resid="Icon.80x80"/>
+                </Icon>
+                <!-- Тип добавляемой кнопки и ее описание -->
+                <!-- Возможные типы: Button, Menu (выпадающий список), MobileButton -->
+                <!-- https://docs.microsoft.com/en-us/office/dev/add-ins/reference/manifest/control -->
+                <!-- Для Control обязательно: -->
+                <!-- Label -->
+                <!-- Supertip -->
+                <!-- Icon -->
+                <!-- Action -->
+                <Control xsi:type="Button" id="PQ.Refresh.Current">
+                  <!-- Название кнопки -->
+                  <Label resid="PQ.Refresh.Current.Label"/>
+                  <!-- Всплывающая подсказка, которая появляется при наведении на кнопку -->
+                  <Supertip>
+                    <Title resid="PQ.Refresh.Current.Label"/>
+                    <Description resid="PQ.Refresh.Current.Tooltip"/>
+                  </Supertip>
+                  <!-- ID иконок кнопки -->
+                  <!-- Sample Todo: Each size needs its own icon resource or it will look distorted when resized -->
+                  <!--Icons. Required sizes: 16, 32, 80; optional: 20, 24, 40, 48, 64. You should provide as many sizes as possible for a great user experience. -->
+                  <!--Use PNG icons and remember that all URLs on the resources section must use HTTPS -->
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <!-- Тип действия, который происходит при нажатии на кнопку -->
+                  <!-- ShowTaskpane (требуется спецификация SourceLocation для указания html документа с разметкой Taskpane) / ExecuteFunction -->
+                  <!-- https://docs.microsoft.com/en-us/office/dev/add-ins/reference/manifest/action#taskpaneid -->
+                  <Action xsi:type="ExecuteFunction">
+                    <!-- Название функции, она должна существовать в "global DOM namespace" файла FunctionFile -->
+                    <FunctionName>refreshCurrentPQ</FunctionName>
+                  </Action>
+                </Control>
+              </Group>
+
+              <!-- Label of your tab -->
+              <!-- If validating with XSD it needs to be at the end -->
+              <!-- ВАЖНО: у Label используется resid, а не id -->
+              <Label resid="FINbyTools.Tab.Label"/>
+            
+            </CustomTab>
+          
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <!-- Если выше везде мы указывали ID при описании структуры надстройкии, то сейчас для каждого ID указываем перечень необходимой информации -->
+    <!-- Например, текстовки названий или пути (url) к файлам с кодом -->
+    <Resources>
+
+      <!-- Ссылки на файлы с иконками для указанных выше ID иконок -->
+      <bt:Images>
+        <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3000/assets/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://localhost:3000/assets/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3000/assets/icon-80.png"/>
+      </bt:Images>
+
+      <!-- Указание URL (URL - это как ссылка на файл с нужным кодом - html/css/js) -->
+      <bt:Urls>
+        <!-- <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812"/> -->
+        <bt:Url id="Commands.Url" DefaultValue="https://localhost:3000/commands.html"/>
+      </bt:Urls>
+
+      <!-- ShortStrings - текстовки для Label и Title (до 125 символов) -->
+      <bt:ShortStrings>
+        <bt:String id="FINbyTools.Tab.Label" DefaultValue="FIN.by Tools"/>
+        <!-- <bt:String id="GetStarted.Title" DefaultValue="Get started with your sample add-in!"/> -->
+        <bt:String id="Group.PQ.Label" DefaultValue="Работа с Power Query"/>
+        <bt:String id="PQ.Refresh.Current.Label" DefaultValue="Обновить текущий запрос"/>
+      </bt:ShortStrings>
+
+      <!-- LongStrings - текстовки для Description -->      
+      <bt:LongStrings>
+        <!-- <bt:String id="GetStarted.Description" DefaultValue="Your sample add-in loaded succesfully. Go to the HOME tab and click the 'Show Taskpane' button to get started."/> -->
+        <bt:String id="PQ.Refresh.Current.Tooltip" DefaultValue="Установите курсор внутри ячейки таблицы, содержащей запрос Power Query, и нажмите кнопку."/>
+      </bt:LongStrings>
+    
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>
